@@ -5,7 +5,14 @@ include(CTest)
 enable_testing()
 
 add_subdirectory(wxWidgets)
-add_executable(curve-editor source/main.cpp)
+include_directories(curve-editor include)
+add_executable(curve-editor 
+    src/main.cpp 
+    src/track.cpp
+    src/trackManager.cpp
+    src/trackRenderer.cpp
+    src/mainWin.cpp
+)
 target_link_libraries(curve-editor wx::core)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

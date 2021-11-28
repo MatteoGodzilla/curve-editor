@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/wxWidgets/include",
-                "${workspaceFolder}/wxWidgets/include/msvc"
+                "${workspaceFolder}/wxWidgets/include/msvc",
+                "${workspaceFolder}/include"
             ],
             "defines": [
                 "_DEBUG",
