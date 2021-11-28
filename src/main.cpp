@@ -7,8 +7,6 @@
 class MainApp : public wxApp{
 public:
     virtual bool OnInit() override {
-        tm = TrackManager();
-        
         win = new MainWin(&tm);
         win->Show();
 
@@ -16,7 +14,7 @@ public:
     }
 private:
     MainWin* win;
-    TrackManager tm;
+    TrackManager tm = TrackManager();
     TrackRenderer tr;
 };
 

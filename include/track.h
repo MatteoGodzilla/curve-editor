@@ -19,7 +19,8 @@ public:
 class Track{
 public:
     Track();
+    Track(int ID);
     ~Track();
-    int id;
+    int id = 0;
     std::vector<Point*> points;
 };
