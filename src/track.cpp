@@ -32,27 +32,27 @@ float evaluateSine(float sampleX, const Point& start, const Point& c){
 }
 
 float Track::Evaluate(float sampleX) const{
+
+    //these indices ignore control points by design    
+    int pointIndexBeforeSample = -1;
+    int pointIndexAfterSample = -1;
+
     for(size_t i = 0; i < points.size(); i++){
-        if(points[i].x <= sampleX && points[i].type != ptCONTROL){
-            //first one that is behind the sampleX
-            switch(points[i].type){
-                case ptLINEAR: 
-                    if(i + 1 < points.size()){
-                        //linear requires the end point to exist
-                        return evaluateLinear(sampleX, points[i], points[i+1]);
-                    }
-                case ptBEZIER:
-                    if(i + 3 < points.size() && points[i+1].type == ptCONTROL && points[i+2] .type == ptCONTROL){
-                        //bezier requires 3 points and first two must be control
-                    }
-                case ptSINE:
-                    if(i + 2 < points.size() && points[i+1].type == ptCONTROL){
-                        //sine requires 2 points and first must be control
-                        return evaluateSine(sampleX, points[i], points[i+1]);
-                    }
-                default: return INVALID_HEIGHT;
+        if(points[i].type != ptCONTROL){
+            if(points[i].x <= sampleX) pointIndexBeforeSample = i;
+            else if(points[i].x > sampleX){
+                pointIndexAfterSample = i;
+                break;
             }
         }
+    }
+
+    int start = pointIndexBeforeSample;
+    switch(points[start].type){
+        case ptNONE: return INVALID_HEIGHT;
+        case ptLINEAR: return evaluateLinear(sampleX, points[start], points[start+1]);
+        case ptBEZIER: return INVALID_HEIGHT;
+        case ptSINE: return evaluateSine(sampleX, points[start], points[start+1]);
     }
     return INVALID_HEIGHT;
 }

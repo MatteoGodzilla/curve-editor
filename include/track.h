@@ -6,6 +6,7 @@
 
 enum pType{
     ptCONTROL,
+    ptNONE,
     ptLINEAR,
     ptBEZIER,
     ptSINE
