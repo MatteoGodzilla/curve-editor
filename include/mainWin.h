@@ -6,7 +6,7 @@
 
 class MainWin : public wxFrame{
 public:
-    MainWin(const TrackManager* trackMan);
+    MainWin(const TrackManager& trackMan);
 private:
     wxStatusBar* status;
 };

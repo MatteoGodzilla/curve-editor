@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include "wx/wx.h"
 #include "wx/vscroll.h"
 #include "wx/dcbuffer.h"
@@ -6,9 +7,7 @@
 
 class TrackRenderer : public wxHVScrolledWindow{
 public:
-    TrackRenderer() = default;
-    ~TrackRenderer() = default;
-    TrackRenderer(wxWindow* parent ,const TrackManager* trackman);
+    TrackRenderer(wxWindow* parent, const TrackManager& trackman);
     
     wxCoord OnGetRowHeight( size_t row ) const override;
     wxCoord OnGetColumnWidth ( size_t col ) const override;
@@ -16,13 +15,14 @@ public:
     void onPaintEvt(wxPaintEvent& e);
     void onDraw(wxDC& dc);
     
-    void drawTrack(wxDC& dc, Track* track, wxPosition begin, wxPosition end);
+    void drawTrack(wxDC& dc, const Track& track, wxPosition begin, wxPosition end);
     
 private:
     wxWindow* win;
-    const TrackManager* tm;
-    int trackHeight = 200;
-    int width = 100;
+    const TrackManager& tm;
+    int trackHeight = 300;
+    int unitWidth = 300;
+    int unitSubdivisions = 4;
     
     wxDECLARE_EVENT_TABLE();
 };

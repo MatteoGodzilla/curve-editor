@@ -7,15 +7,14 @@
 class MainApp : public wxApp{
 public:
     virtual bool OnInit() override {
-        win = new MainWin(&tm);
+        win = new MainWin(tm);
         win->Show();
 
         return true;
     }
 private:
     MainWin* win;
-    TrackManager tm = TrackManager();
-    TrackRenderer tr;
+    TrackManager tm;
 };
 
 wxIMPLEMENT_APP(MainApp);

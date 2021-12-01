@@ -4,17 +4,16 @@ wxBEGIN_EVENT_TABLE(TrackRenderer,wxHVScrolledWindow)
     EVT_PAINT(TrackRenderer::onPaintEvt)
 wxEND_EVENT_TABLE()
 
-TrackRenderer::TrackRenderer(wxWindow* parent, const TrackManager* trackman)
-    : wxHVScrolledWindow(parent)
+TrackRenderer::TrackRenderer(wxWindow* parent, const TrackManager& trackman)
+    : wxHVScrolledWindow(parent), tm(trackman)
 {
     SetBackgroundStyle(wxBG_STYLE_PAINT);
-    tm = trackman;
 }
 
 void TrackRenderer::onPaintEvt(wxPaintEvent& e){
     wxBufferedPaintDC dc(this);
-    SetRowCount(tm->tracks.size());
-    SetColumnCount(4);
+    SetRowCount(tm.tracks.size());
+    SetColumnCount((tm.getMaximumWidth() + 1) * unitSubdivisions);
     
     PrepareDC(dc);
     onDraw(dc);
@@ -26,17 +25,18 @@ void TrackRenderer::onDraw(wxDC& dc){
     wxPosition begin = GetVisibleBegin();
     wxPosition end = GetVisibleEnd();
 
-    for(auto t : tm->tracks){
+    for(auto& t : tm.tracks){
         drawTrack(dc,t,begin,end);
     }
 }
 
-void TrackRenderer::drawTrack(wxDC& dc, Track* track, wxPosition begin, wxPosition end){
+void TrackRenderer::drawTrack(wxDC& dc, const Track& track, wxPosition begin, wxPosition end){
     //skip rendering if track is off screen
-    if(track->id >= begin.GetRow() && track->id < end.GetRow()){
-        int baseY = track->id * trackHeight;
-        int baseX = begin.GetCol() * width;
-        int w = (end.GetCol() - begin.GetCol()) * width;
+    if(track.id >= begin.GetRow() && track.id < end.GetRow()){
+        int columnWidth = (unitWidth / unitSubdivisions);
+        int baseY = track.id * trackHeight;
+        int baseX = begin.GetCol() * columnWidth;
+        int w = (end.GetCol() - begin.GetCol()) * columnWidth;
         int h = (end.GetRow() - begin.GetRow()) * trackHeight;
         
         wxPen pen = dc.GetPen();
@@ -56,10 +56,30 @@ void TrackRenderer::drawTrack(wxDC& dc, Track* track, wxPosition begin, wxPositi
 
         //draw tick marks
         for(int x = begin.GetCol(); x <= end.GetCol(); x++){
-            dc.DrawLine(x*width,baseY,x*width,baseY+trackHeight);
+            dc.DrawLine(x*columnWidth, baseY, x*columnWidth, baseY+trackHeight);
+        }
+
+        //draw curve
+        pen.SetColour(128,255,0);
+        dc.SetPen(pen);
+        int s = begin.GetCol() * columnWidth;
+        int e = end.GetCol() * columnWidth;
+        for(int x = s; x < e; x++){
+            //go through all pixels
+            float sampleX = (float)(x) / unitWidth;
+            float sampleHeight = track.Evaluate(sampleX);
+            int y = baseY + round((float)trackHeight * (1.0f - sampleHeight));
+            if(sampleHeight != INVALID_HEIGHT){
+                dc.DrawPoint(x,y);
+                dc.DrawPoint(x - 1, y);
+                dc.DrawPoint(x + 1, y);
+                dc.DrawPoint(x, y - 1);
+                dc.DrawPoint(x, y + 1);
+            }
         }
 
         //separator
+        pen.SetColour(31,31,31);
         pen.SetWidth(3);
         pen.SetStyle(wxPENSTYLE_SOLID);
         dc.SetPen(pen);
@@ -74,5 +94,5 @@ wxCoord TrackRenderer::OnGetRowHeight( size_t row ) const {
 }
 
 wxCoord TrackRenderer::OnGetColumnWidth ( size_t col ) const {
-    return wxCoord(width);
+    return wxCoord(unitWidth / unitSubdivisions);
 }
