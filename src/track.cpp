@@ -32,18 +32,13 @@ float evaluateSine(float sampleX, const Point& start, const Point& c){
 }
 
 float Track::Evaluate(float sampleX) const{
-
     //these indices ignore control points by design    
     int pointIndexBeforeSample = -1;
-    int pointIndexAfterSample = -1;
 
     for(size_t i = 0; i < points.size(); i++){
         if(points[i].type != ptCONTROL){
             if(points[i].x <= sampleX) pointIndexBeforeSample = i;
-            else if(points[i].x > sampleX){
-                pointIndexAfterSample = i;
-                break;
-            }
+            else if(points[i].x > sampleX) break; 
         }
     }
 
