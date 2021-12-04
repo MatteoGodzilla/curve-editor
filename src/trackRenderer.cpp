@@ -2,12 +2,18 @@
 
 wxBEGIN_EVENT_TABLE(TrackRenderer,wxHVScrolledWindow)
     EVT_PAINT(TrackRenderer::onPaintEvt)
+    EVT_MOTION(TrackRenderer::onMotion)
 wxEND_EVENT_TABLE()
 
-TrackRenderer::TrackRenderer(wxWindow* parent, const TrackManager& trackman)
+TrackRenderer::TrackRenderer(wxWindow* parent, TrackManager& trackman)
     : wxHVScrolledWindow(parent), tm(trackman)
 {
     SetBackgroundStyle(wxBG_STYLE_PAINT);
+}
+
+void TrackRenderer::onMotion(wxMouseEvent& e){
+    //forward event to trackmanager
+    tm.onMotion(e);
 }
 
 void TrackRenderer::onPaintEvt(wxPaintEvent& e){
@@ -56,15 +62,23 @@ void TrackRenderer::drawTrack(wxDC& dc, const Track& track, wxPosition begin, wx
 
         //draw tick marks
         for(int x = begin.GetCol(); x <= end.GetCol(); x++){
+            if(x % unitSubdivisions == 0){
+                pen.SetStyle(wxPENSTYLE_SOLID);
+                pen.SetWidth(2);
+            } else {
+                pen.SetStyle(wxPENSTYLE_SHORT_DASH);
+                pen.SetWidth(1);
+            }
+            dc.SetPen(pen);
             dc.DrawLine(x*columnWidth, baseY, x*columnWidth, baseY+trackHeight);
         }
 
         //draw curve
         pen.SetColour(128,255,0);
         dc.SetPen(pen);
-        int s = begin.GetCol() * columnWidth;
-        int e = end.GetCol() * columnWidth;
-        for(int x = s; x < e; x++){
+        int startPixel = begin.GetCol() * columnWidth;
+        int endPixel = end.GetCol() * columnWidth;
+        for(int x = startPixel; x < endPixel; x++){
             //go through all pixels
             float sampleX = (float)(x) / unitWidth;
             float sampleHeight = track.Evaluate(sampleX);
@@ -75,6 +89,21 @@ void TrackRenderer::drawTrack(wxDC& dc, const Track& track, wxPosition begin, wx
                 dc.DrawPoint(x + 1, y);
                 dc.DrawPoint(x, y - 1);
                 dc.DrawPoint(x, y + 1);
+            }
+        }
+
+        //draw points
+        brush.SetColour(200,0,0);
+        pen.SetColour(200,0,0);
+        dc.SetBrush(brush);
+        dc.SetPen(pen);
+        for(int i = 0; i < track.points.size(); i++){
+            const Point& point = track.points[i];
+            float startView = (float)(begin.GetCol()) / unitSubdivisions;
+            float endView = (float)(end.GetCol()) / unitSubdivisions;
+
+            if(startView <= point.x && point.x < endView){
+                dc.DrawCircle(point.x * unitWidth, baseY + (1.0 - point.y) * trackHeight, 5);
             }
         }
 

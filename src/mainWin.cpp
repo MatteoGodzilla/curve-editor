@@ -1,6 +1,6 @@
 #include "mainWin.h"
 
-MainWin::MainWin(const TrackManager& trackman)
+MainWin::MainWin(TrackManager& trackman)
     : wxFrame(nullptr,wxID_ANY,"Curve Editor 0.1.0",wxDefaultPosition,wxSize(800,600))
 {
     new TrackRenderer(this, trackman);

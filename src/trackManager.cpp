@@ -16,3 +16,7 @@ int TrackManager::getMaximumWidth() const{
     }
     return m;
 }
+
+void TrackManager::onMotion(wxMouseEvent& e){
+    
+}
